@@ -1,34 +1,75 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState, useContext } from 'react'
 import * as THREE from 'three'
 import BassShader from './shaders/BassShader.glsl'
 import AudioVertexShader from './shaders/AudioVertexShader.glsl'
 
-export const Container = () => {
-  const mount = useRef(null)
-  const [isAnimating, setAnimating] = useState(true)
-  const controls = useRef(null)
+const initialState = {
+  mediaElement: null,
+  analyser: null,
+  uniforms: null
+}
 
-  useEffect(() => {
-    let fftSize = 128;
-    let listener = new THREE.AudioListener();
-    let audio = new THREE.Audio( listener );
-    let mediaElement = new Audio('~/music/thedeadfish.wav');
-    audio.setMediaElementSource(mediaElement);
+const AudioContext = React.createContext()
+const AudioProvider = = ({reducer, initialState, children}) => {
+  const [state, dispatch] = useReducer(reducer, initialState)
+  const actions = useActions(state, dispatch)
+  const value = {
+    state: state,
+    actions: actions
+  }
+  
+  return(
+    <AudioContext.Provider value={value} >
+      { children }
+    </AudioContext.Provider>
+  )
+)
 
-    
-    let analyser = new THREE.AudioAnalyser( audio, fftSize );
-    let uniforms = {
-      tAudioData: {
-        value: new THREE.DataTexture(
-          analyser.data,
-          fftSize / 2,
-          1,
-          THREE.LuminanceFormat
-        )
-      }
+const reducer = (state, action) => {
+  switch (action.type) {
+  case "SET_MEDIA":
+    return {
+      ...state,
+      mediaElement: action.payload
+    }
+  
+  case "SET_ANALYSER":
+    return {
+      ...state,
+      analyser: action.payload
     }
 
+  case "SET_UNIFORMS":
+    return {
+      ...state,
+      uniforms: action.payload
+    }
+  }
+}
 
+
+
+const Container = () => {
+  const {state, actions} = useContext(AudioContext)
+  const mount = useRef(null)
+  const [isAnimating, setAnimating] = useState(false)
+  const controls = useRef(null)
+  
+  useEffect(() => {
+    new Audio('thedeadfish.wav')
+
+  },[])
+
+  useEffect(() => {
+    actions.loadAudio()
+  }, [mediaElement])
+
+  useEffect(() => {
+    let analyser = getAnalyser(audio, 128)
+    let uniforms = getUniforms(analyser)
+    if (mediaElement) {
+      uniforms = getUniforms()
+    }
     let width = mount.current.clientWidth
     let height = mount.current.clientHeight
     let frameId
@@ -44,11 +85,16 @@ export const Container = () => {
       transparent: true,
       opacity: 0.5
     } );
+    //const torusGeometry = new THREE.TorusGeometry( 5, 30, 16, 100 );
+    //const torusGeometry = new THREE.TorusGeometry( 1, 3, 16, 100 );
+    const torusGeometry = new THREE.TorusGeometry( 10, 3, 16, 100 );
 
+    const torus = new THREE.Mesh(torusGeometry, material)
     const cube = new THREE.Mesh(geometry, material)
 
     camera.position.z = 4
     scene.add(cube)
+    scene.add(torus)
     renderer.setClearColor('#000000')
     renderer.setSize(width, height)
 
@@ -69,20 +115,25 @@ export const Container = () => {
       cube.rotation.x += 0.01
       cube.rotation.y += 0.01
 
+      torus.rotation.z += 0.01
+      torus.rotation.y += 0.0001
+
       renderScene()
-      frameId = window.requestAnimationFrame(animate)
+      analyser.getFrequencyData()
       uniforms.tAudioData.value.needsUpdate = true
+      frameId = window.requestAnimationFrame(animate)
     }
 
     const start = () => {
       if (!frameId) {
-        frameId = requestAnimationFrame(animate)
         mediaElement.play()
+        frameId = requestAnimationFrame(animate)
       }
     }
 
     const stop = () => {
       cancelAnimationFrame(frameId)
+      mediaElement.pause()
       frameId = null
     }
 
@@ -101,7 +152,7 @@ export const Container = () => {
       geometry.dispose()
       material.dispose()
     }
-  }, [])
+  }, [audio])
 
   useEffect(() => {
     if (isAnimating) {
@@ -113,3 +164,13 @@ export const Container = () => {
   
   return <div className="container" ref={mount} onClick={() => setAnimating(!isAnimating)} />
 }
+
+const AudioContainer = () => {
+  return (
+    <AudioProvider initialState={initialState} reducer={reducer}>
+      <Container/>
+    </AudioProvider>
+  )
+}
+
+export default AudioContainer
