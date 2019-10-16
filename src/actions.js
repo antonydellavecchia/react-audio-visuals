@@ -34,7 +34,7 @@ export const useActions = (state, dispatch) => {
   }
 
   const animate = () => {
-    console.log(state.analyser.getFrequencyData())
+    state.analyser.getFrequencyData()
     state.uniforms.tAudioData.value.needsUpdate = true
   }
 

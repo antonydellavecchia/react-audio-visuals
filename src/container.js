@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState, useContext, useReducer } from 'react'
 import * as THREE from 'three'
 import BassShader from './shaders/BassShader.glsl'
+import GuitarShader from './shaders/GuitarShader.glsl'
 import AudioVertexShader from './shaders/AudioVertexShader.glsl'
 import { useActions } from './actions'
 import Scene from './objects/Scene'
@@ -67,12 +68,12 @@ const Container = () => {
       let height = mount.current.clientHeight
       let frameId
       let scene = new Scene(width, height)
-
+      console.log(uniforms)
       const geometry = new THREE.BoxGeometry(1, 1, 1)
       const material = new THREE.ShaderMaterial( {
         uniforms: uniforms,
         vertexShader: AudioVertexShader,
-        fragmentShader: BassShader,
+        fragmentShader: GuitarShader,
         transparent: true,
         opacity: 0.5
       } );
@@ -118,7 +119,7 @@ const Container = () => {
       const stop = () => {
         if (mediaElement) {
           cancelAnimationFrame(frameId)
-          state.mediaElement.pause()
+          mediaElement.pause()
           frameId = null
         }
       }

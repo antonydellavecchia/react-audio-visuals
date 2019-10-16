@@ -19,6 +19,7 @@ export default class Scene {
   }
 
   add(objects) {
+    console.log('adding objects')
     objects.forEach(object => {
       this.scene.add(object)
     })
