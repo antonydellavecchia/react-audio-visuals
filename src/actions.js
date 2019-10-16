@@ -1,30 +1,29 @@
 import * as THREE from 'three'
 
 export const useActions = (state, dispatch) => {
-  const actions = {
-    loadAudio
-  }
-
-  const loadAudio = async (mediaElement) => {
+  const loadAudio = async (mediaElement, fftSize) => {
+    console.log(mediaElement)
     let listener = new THREE.AudioListener();
     let audio = new THREE.Audio( listener );
-
+    let analyser = new THREE.AudioAnalyser( audio, fftSize )
     await audio.setMediaElementSource(mediaElement);
 
-    //dispatch
-  }
-
-  const getAnalyser = (audio, fftSize) => {
-    return new THREE.AudioAnalyser( audio, fftSize );
-  }
-
-  const getUniforms = (state) => {
+    dispatch({
+      type: "SET_MEDIA",
+      payload: mediaElement
+    })
+    
+    dispatch({
+      type: "SET_ANALYSER",
+      payload: analyser
+    })
+    
     dispatch({
       type: "SET_UNIFORMS",
       payload: {
         tAudioData: {
           value: new THREE.DataTexture(
-            state.analyser.data,
+            analyser.data,
             fftSize / 2,
             1,
             THREE.LuminanceFormat
@@ -32,5 +31,15 @@ export const useActions = (state, dispatch) => {
         }
       }
     })
+  }
+
+  const animate = () => {
+    console.log(state.analyser.getFrequencyData())
+    state.uniforms.tAudioData.value.needsUpdate = true
+  }
+
+  return {
+    loadAudio,
+    animate
   }
 }
