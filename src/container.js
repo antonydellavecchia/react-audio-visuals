@@ -51,17 +51,37 @@ const reducer = (state, action) => {
 }
 
 const Container = () => {
-  const {state, actions} = useContext(AudioContext)
-  const {analyser, uniforms, mediaElement} = state
+  console.log('helllo')
+  //const {state, actions} = useContext(AudioContext)
+  //const {analyser, uniforms, mediaElement} = state
   const mount = useRef(null)
   const [isAnimating, setAnimating] = useState(false)
   const controls = useRef(null)
   
   useEffect(() => {
-    actions.loadAudio(new Audio('thedeadfish.wav'))
+    //actions.loadAudio(new Audio('thedeadfish.wav'))
   }, [])
 
   useEffect(() => {
+    let fftSize = 128;
+    let listener = new THREE.AudioListener();
+    let audio = new THREE.Audio( listener );
+    let mediaElement = new Audio('thedeadfish.wav');
+    audio.setMediaElementSource(mediaElement);
+    
+    
+    let analyser = new THREE.AudioAnalyser( audio, fftSize );
+    let uniforms = {
+      tAudioData: {
+        value: new THREE.DataTexture(
+          analyser.data,
+          fftSize / 2,
+          1,
+          THREE.LuminanceFormat
+        )
+      }
+    }
+    
     if(mediaElement && analyser && uniforms) {
       console.log('geometry')
       let width = mount.current.clientWidth
@@ -73,14 +93,14 @@ const Container = () => {
       const material = new THREE.ShaderMaterial( {
         uniforms: uniforms,
         vertexShader: AudioVertexShader,
-        fragmentShader: GuitarShader,
+        fragmentShader: BassShader,
         transparent: true,
         opacity: 0.5
       } );
 
       //const torusGeometry = new THREE.TorusGeometry( 5, 30, 16, 100 );
-      //const torusGeometry = new THREE.TorusGeometry( 1, 3, 16, 100 );
-      const torusGeometry = new THREE.TorusGeometry( 10, 3, 16, 100 );
+      const torusGeometry = new THREE.TorusGeometry( 1, 3, 16, 100 );
+      //const torusGeometry = new THREE.TorusGeometry( 10, 3, 16, 100 );
       
       const torus = new THREE.Mesh(torusGeometry, material)
       const cube = new THREE.Mesh(geometry, material)
@@ -96,17 +116,17 @@ const Container = () => {
         cube.rotation.x += 0.01
         cube.rotation.y += 0.01
 
-        //torus.rotation.z += 0.01
-        //torus.rotation.y += 0.0001
+        torus.rotation.z += 0.01
+        torus.rotation.y += 0.0001
 
         
 
-        //analyser.getFrequencyData()
 
-        //uniforms.tAudioData.value.needsUpdate = true
         scene.renderScene()
         frameId = window.requestAnimationFrame(animate)
-        actions.animate()
+        analyser.getFrequencyData()
+        uniforms.tAudioData.value.needsUpdate = true
+        //actions.animate()
       }
 
       const start = () => {
@@ -140,11 +160,11 @@ const Container = () => {
         material.dispose()
       }
     }
-  }, [isAnimating, mediaElement])
+  }, [isAnimating])
 
   useEffect(() => {
-    console.log(state)
-  }, [state])
+    //console.log(state)
+  }, [])
 
   useEffect(() => {
     try {
@@ -156,7 +176,7 @@ const Container = () => {
     }
 
     catch {
-      console.log('waiting for media')
+      console.log('waiyting for media')
     }
   }, [isAnimating])
   
