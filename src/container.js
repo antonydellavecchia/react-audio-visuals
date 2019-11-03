@@ -6,12 +6,6 @@ import AudioVertexShader from './shaders/AudioVertexShader.glsl'
 import { useActions } from './actions'
 import Scene from './objects/Scene'
 
-const initialState = {
-  mediaElement: null,
-  analyser: null,
-  uniforms: null
-}
-
 const AudioContext = React.createContext()
 const AudioProvider = ({reducer, initialState, children}) => {
   const [state, dispatch] = useReducer(reducer, initialState)
@@ -28,139 +22,95 @@ const AudioProvider = ({reducer, initialState, children}) => {
   )
 }
 
+const initialState = {
+  loading: true
+}
+
 const reducer = (state, action) => {
   switch (action.type) {
-  case "SET_MEDIA":
+  case "SET_LOADING":
     return {
       ...state,
-      mediaElement: action.payload
-    }
-  
-  case "SET_ANALYSER":
-    return {
-      ...state,
-      analyser: action.payload
-    }
-
-  case "SET_UNIFORMS":
-    return {
-      ...state,
-      uniforms: action.payload
+      loading: action.payload
     }
   }
 }
 
 const Container = () => {
-  console.log('helllo')
-  //const {state, actions} = useContext(AudioContext)
-  //const {analyser, uniforms, mediaElement} = state
+  console.log('container')
+  const {state, actions} = useContext(AudioContext)
   const mount = useRef(null)
   const [isAnimating, setAnimating] = useState(false)
   const controls = useRef(null)
-  
-  useEffect(() => {
-    //actions.loadAudio(new Audio('thedeadfish.wav'))
-  }, [])
 
   useEffect(() => {
-    let fftSize = 128;
-    let listener = new THREE.AudioListener();
-    let audio = new THREE.Audio( listener );
-    let mediaElement = new Audio('thedeadfish.wav');
-    audio.setMediaElementSource(mediaElement);
-    
-    
-    let analyser = new THREE.AudioAnalyser( audio, fftSize );
-    let uniforms = {
-      tAudioData: {
-        value: new THREE.DataTexture(
-          analyser.data,
-          fftSize / 2,
-          1,
-          THREE.LuminanceFormat
-        )
-      }
-    }
-    
-    if(mediaElement && analyser && uniforms) {
-      console.log('geometry')
-      let width = mount.current.clientWidth
-      let height = mount.current.clientHeight
-      let frameId
-      let scene = new Scene(width, height)
+    // initate scene
+    let width = mount.current.clientWidth
+    let height = mount.current.clientHeight
+    let frameId
+    let scene = new Scene(width, height)
+    scene.loadAudioObject('thedeadfish.wav').then(({uniforms}) => {
       console.log(uniforms)
-      const geometry = new THREE.BoxGeometry(1, 1, 1)
-      const material = new THREE.ShaderMaterial( {
+      scene.loadMeshes([{
         uniforms: uniforms,
-        vertexShader: AudioVertexShader,
-        fragmentShader: BassShader,
-        transparent: true,
-        opacity: 0.5
-      } );
+        geometry: new THREE.SphereGeometry( 1, 32, 32 ),
+        name: 'disco-ball',
+        position: {x: 0, y: 0, z: 10},
+        vertexShader: AudioVertexShader
+      }, {
+        uniforms: uniforms,
+        geometry: new THREE.PlaneGeometry(50,50,50),
+        name: 'floor',
+        vertexShader: AudioVertexShader
+      }])
+    })
 
-      //const torusGeometry = new THREE.TorusGeometry( 5, 30, 16, 100 );
-      const torusGeometry = new THREE.TorusGeometry( 1, 3, 16, 100 );
-      //const torusGeometry = new THREE.TorusGeometry( 10, 3, 16, 100 );
+    scene.setCameraPosition({x: 0, y: 3, z: 10})
+    
+    const handleResize = () => {
+      scene.handleResize(mount.current.clientWidth, mount.current.clientHeight)
+    }
       
-      const torus = new THREE.Mesh(torusGeometry, material)
-      const cube = new THREE.Mesh(geometry, material)
+    const animate = () => {
+      //cube.rotation.x += 0.01
+      //cube.rotation.y += 0.01
+//
+//      torus.rotation.z += 0.01
+//      torus.rotation.y += 0.0001
 
-      scene.setCameraPosition({x: 0, y: 0, z: 4})
-      scene.add([cube, torus])
+      scene.renderScene()
+      frameId = window.requestAnimationFrame(animate)
+    }
 
-      const handleResize = () => {
-        scene.handleResize(mount.current.clientWidth, mount.current.clientHeight)
-      }
-      
-      const animate = () => {
-        cube.rotation.x += 0.01
-        cube.rotation.y += 0.01
-
-        torus.rotation.z += 0.01
-        torus.rotation.y += 0.0001
-
-        
-
-
-        scene.renderScene()
-        frameId = window.requestAnimationFrame(animate)
-        analyser.getFrequencyData()
-        uniforms.tAudioData.value.needsUpdate = true
-        //actions.animate()
-      }
-
-      const start = () => {
-        if (!frameId && mediaElement && analyser && uniforms && isAnimating) {
-          mediaElement.play()
-          frameId = requestAnimationFrame(animate)
-        }
-      }
-
-      const stop = () => {
-        if (mediaElement) {
-          cancelAnimationFrame(frameId)
-          mediaElement.pause()
-          frameId = null
-        }
-      }
-
-      mount.current.appendChild(scene.renderer.domElement)
-      window.addEventListener('resize', handleResize)
-      //start()
-
-      controls.current = { start, stop }
-      
-      return () => {
-        stop()
-        window.removeEventListener('resize', handleResize)
-        //mount.current.removeChild(renderer.domElement)
-
-        //scene.remove(cube)
-        geometry.dispose()
-        material.dispose()
+    const start = () => {
+      if (!frameId) {
+        scene.play()
+        frameId = requestAnimationFrame(animate)
       }
     }
-  }, [isAnimating])
+
+    const stop = () => {
+      cancelAnimationFrame(frameId)
+      scene.pause()
+      frameId = null
+    }
+
+    mount.current.appendChild(scene.renderer.domElement)
+    window.addEventListener('resize', handleResize)
+    //start()
+
+    controls.current = { start, stop }
+      
+    return () => {
+      stop()
+      window.removeEventListener('resize', handleResize)
+      //mount.current.removeChild(renderer.domElement)
+
+      //scene.remove(cube)
+      //geometry.dispose()
+      //material.dispose()
+    }
+  }, [])
 
   useEffect(() => {
     //console.log(state)
