@@ -21,13 +21,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-/config/webpack.config.js~
-/public/thedeadfish.wav
-/src/actions.js~
-/src/objects/Dynamics.js
-/src/objects/Model.js~
-/src/objects/Scene.js~
-/src/objects/Trajectory.js
-/src/objects/Trajectory.js~
-/src/objects/VectorField.js~
-/src/shaders/RedShader.glsl
+*~
+*.wav
+
