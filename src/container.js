@@ -48,21 +48,23 @@ const Container = () => {
     let width = mount.current.clientWidth
     let height = mount.current.clientHeight
     let frameId
-    let scene = new Scene(width, height)
-    scene.loadAudioObject('thedeadfish.wav').then(({uniforms}) => {
-      console.log(uniforms)
-      scene.loadMeshes([{
-        uniforms: uniforms,
+    let scene = new Scene({
+      width,
+      height,
+      models: [{
         geometry: new THREE.SphereGeometry( 1, 32, 32 ),
         name: 'disco-ball',
         position: {x: 0, y: 0, z: 10},
-        vertexShader: AudioVertexShader
+        vectorFieldConfig: "CIRCLEXZ"
       }, {
-        uniforms: uniforms,
         geometry: new THREE.PlaneGeometry(50,50,50),
         name: 'floor',
         vertexShader: AudioVertexShader
-      }])
+      }]
+    })
+    
+    scene.loadAudioObject('thedeadfish.wav').then(({uniforms}) => {
+      scene.loadMeshes(uniforms)
     })
 
     scene.setCameraPosition({x: 0, y: 3, z: 10})

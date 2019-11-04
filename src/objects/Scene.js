@@ -2,23 +2,19 @@ import * as THREE from  'three'
 import BassShader from '../shaders/BassShader.glsl'
 import GuitarShader from '../shaders/GuitarShader.glsl'
 import AudioVertexShader from '../shaders/AudioVertexShader.glsl'
-
 import AudioObject from './AudioObject'
+import Model from './Model'
 import VectorField from './VectorField'
-import { audioMesh } from '../utils'
-
+              
 export default class Scene {
-  constructor(width, height) {
+  constructor({width, height, models}) {
     this.scene = new THREE.Scene()
     this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
     this.renderer = new THREE.WebGLRenderer({ antialias: true })
     this.renderer.setClearColor('#000000')
     this.renderer.setSize(width, height)
-    this.cameraVectorField = new VectorField({
-      x: (position) => - position.y,
-      y: (position) => position.x
-    })
-    
+    this.cameraVectorField = new VectorField('CIRCLEXY_SINEZ')
+    this.models = models.map(model => new Model(model))
     console.log(this.scene)
   }
 
@@ -27,21 +23,21 @@ export default class Scene {
     this.camera.position.x = x
     this.camera.position.y = y
     this.camera.lookAt(0, 0, 0)
-    console.log(this.camera)
   }
 
   cameraAnimate(stepSize) {
     let curr = this.camera.position
-    let next = this.cameraVectorField.flow({position: curr, stepSize: stepSize})
+    let next = this.cameraVectorField.flow({position: curr, stepSize})
     this.setCameraPosition(next)
   }
 
   renderScene() {
     this.cameraAnimate()
+    this.models.forEach(model => model.animate())
     this.renderer.render(this.scene, this.camera)
     this.audio.animate()
-    let discoBall = this.scene.children.find(mesh => mesh.name === 'disco-ball')
-    discoBall.rotation.z += 0.01
+    //let discoBall = this.scene.children.find(mesh => mesh.name === 'disco-ball')
+    //discoBall.rotation.z += 0.01
   }
 
   play() {
@@ -71,13 +67,9 @@ export default class Scene {
     return this.audio
   }
 
-  loadMeshes(models) {
-    models.forEach(model => {
-      const {geometry, uniforms, name, position = {x:0, y:0, z:0}, vertexShader} = model
-      console.log(vertexShader)
-      let mesh = audioMesh({geometry, uniforms, vertexShader})
-      mesh.name = name
-      mesh.position.set(position.x, position.y, position.z)
+  loadMeshes(uniforms) {
+    this.models.forEach(model => {
+      let mesh = model.initMesh(uniforms)
       this.scene.add(mesh)
     })
   }
