@@ -9,7 +9,7 @@ export default function getConfig(name) {
       z: (position) => {
         let radius = dist({pos1: position})
         let argument = position.y / radius
-        let externalDerivative = Math.cos(Math.PI * Math.asin(argument)) * Math.PI / (Math.sqrt(1 - Math.pow(argument, 2)))
+        let externalDerivative = Math.cos(Math.asin(argument)) / (Math.sqrt(1 - Math.pow(argument, 2)))
         let derivative = externalDerivative * position.x
 
         return derivative
@@ -20,6 +20,25 @@ export default function getConfig(name) {
     return {
       x: (position) => position.z,
       z: (position) => - position.x
+    }
+
+
+  case "RANDOM":
+    return {
+      x: (position) => position.x * position.z,
+      y: (position) => - position.z,
+      z: (position) => - position.z
+    }
+
+  case "LORENZ":
+    let sigma = 10
+    let beta = 8 / 3
+    let rho = 28
+
+    return {
+      x: (position) => rho * (position.y - position.x),
+      y: (position) => position.x * (rho - position.z) - position.y,
+      z: (position) => position.x * position.y - beta * position.z
     }
 
   default:

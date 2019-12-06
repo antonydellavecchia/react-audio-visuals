@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import AudioVertexShader from '../shaders/AudioVertexShader.glsl'
+import VertexShader from '../shaders/VertexShader.glsl'
 import { audioMesh } from '../utils'
 import VectorField from './VectorField'
 
@@ -8,13 +9,15 @@ export default class Model {
     geometry,
     name,
     position = {x:0, y:0, z:0},
-    vertexShader = AudioVertexShader,
+    vertexShader = VertexShader,
+    fragmentShader,
     vectorFieldConfig
   }) {
     this.geometry = geometry
     this.name = name
     this.position = position
     this.vertexShader = vertexShader
+    this.fragmentShader = fragmentShader
     this.vectorField = new VectorField(vectorFieldConfig)
   }
 
@@ -22,7 +25,8 @@ export default class Model {
     let mesh = audioMesh({
       uniforms,
       geometry: this.geometry,
-      vertexShader: this.vertexShader
+      vertexShader: this.vertexShader,
+      fragmentShader: this.fragmentShader
     })
 
     mesh.name = this.name
@@ -44,6 +48,5 @@ export default class Model {
       next.y,
       next.z
     )
-    console.log(this.mesh)
   }
 }

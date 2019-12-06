@@ -5,6 +5,7 @@ import AudioVertexShader from '../shaders/AudioVertexShader.glsl'
 import AudioObject from './AudioObject'
 import Model from './Model'
 import VectorField from './VectorField'
+import CameraGroup from './CameraGroup'
               
 export default class Scene {
   constructor({width, height, models}) {
@@ -13,35 +14,52 @@ export default class Scene {
     this.renderer = new THREE.WebGLRenderer({ antialias: true })
     this.renderer.setClearColor('#000000')
     this.renderer.setSize(width, height)
-    this.cameraVectorField = new VectorField('CIRCLEXY_SINEZ')
     this.models = models.map(model => new Model(model))
+    this.cameraGroup = new CameraGroup({name: "SQUARE", focus: {x: 0, y: -1, z: 0}}, 25)
+    this.step = 0
+
     console.log(this.scene)
   }
 
-  setCameraPosition({x, y, z}) {
+  cameraAnimate(stepSize) {
+    const {x, y, z} = this.cameraGroup.activePosition()
     this.camera.position.z = z
     this.camera.position.x = x
     this.camera.position.y = y
-    this.camera.lookAt(0, 0, 0)
-  }
+    
+    this.camera.lookAt(
+      this.cameraGroup.focus.x,
+      this.cameraGroup.focus.y,
+      this.cameraGroup.focus.z
+    )
 
-  cameraAnimate(stepSize) {
-    let curr = this.camera.position
-    let next = this.cameraVectorField.flow({position: curr, stepSize})
-    this.setCameraPosition(next)
+    this.camera.up.set(0, 0, 1)
+    this.cameraGroup.flow(stepSize)
   }
-
+  
   renderScene() {
     this.cameraAnimate()
     this.models.forEach(model => model.animate())
     this.renderer.render(this.scene, this.camera)
     this.audio.animate()
-    //let discoBall = this.scene.children.find(mesh => mesh.name === 'disco-ball')
-    //discoBall.rotation.z += 0.01
+
+    if (this.step > 30) {
+      //this.cameraGroup.next()
+      this.step = 0
+    }
+
+    else {
+      this.step += 1
+    }
   }
 
   play() {
     this.audio.play()
+    this.cameraGroup.switch(3)
+    //this.cameraGroup.follow(
+    //  this.models[0].mesh.position,
+    //  this.models[0].vectorField
+    //)
   }
 
   pause() {
@@ -58,12 +76,7 @@ export default class Scene {
   async loadAudioObject(url) {
     this.audio = new AudioObject(url)
     console.log(this.audio, 'audio')
-    //let mesh1 = audioMesh({uniforms})
-    //let mesh2 = audioMesh({ geometry: new THREE.SphereGeometry( 1, 32, 32 ), uniforms})
-    //mesh2.position.set(0, 3, 5)
-    //meshes = [mesh1, mesh2]
 
-    //meshes.forEach(mesh => { this.scene.add(mesh) })
     return this.audio
   }
 
@@ -73,7 +86,6 @@ export default class Scene {
       this.scene.add(mesh)
     })
   }
-  
   
   handleResize(width, height) {
     this.renderer.setSize(width, height)

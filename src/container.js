@@ -3,8 +3,11 @@ import * as THREE from 'three'
 import BassShader from './shaders/BassShader.glsl'
 import GuitarShader from './shaders/GuitarShader.glsl'
 import AudioVertexShader from './shaders/AudioVertexShader.glsl'
+import GridShader from './shaders/GridShader.glsl'
 import { useActions } from './actions'
 import Scene from './objects/Scene'
+import axios from 'axios'
+import SoundCloudAudio from 'soundcloud-audio'
 
 const AudioContext = React.createContext()
 const AudioProvider = ({reducer, initialState, children}) => {
@@ -40,46 +43,59 @@ const Container = () => {
   console.log('container')
   const {state, actions} = useContext(AudioContext)
   const mount = useRef(null)
+  const [points, setPoints] = useState(null)
   const [isAnimating, setAnimating] = useState(false)
   const controls = useRef(null)
-
+  
   useEffect(() => {
+    axios.get("http://localhost:8080/points").then(({data}) => setPoints(data.points))
+  }, [])
+  
+  useEffect(() => {
+    console.log(points)
+    if (!points) return
+    
     // initate scene
     let width = mount.current.clientWidth
     let height = mount.current.clientHeight
     let frameId
+    let models = points.map((point, index) => {
+      return {
+        geometry: new THREE.SphereGeometry(50, 50, 50),
+        name: `disco-ball-${index}`,
+        position: point,
+        vectorFieldConfig: "LORENZ"
+      }
+    })
+
+    models.push({
+      geometry: new THREE.TorusGeometry(25, 25, 25),
+      name: 'floor',
+      position: {x: 0, y:0, z: -1},
+      vertexShader: AudioVertexShader,
+      fragmentShader: GridShader
+    })
+    
     let scene = new Scene({
       width,
       height,
-      models: [{
-        geometry: new THREE.SphereGeometry( 1, 32, 32 ),
-        name: 'disco-ball',
-        position: {x: 0, y: 0, z: 10},
-        vectorFieldConfig: "CIRCLEXZ"
-      }, {
-        geometry: new THREE.PlaneGeometry(50,50,50),
-        name: 'floor',
-        vertexShader: AudioVertexShader
-      }]
-    })
-    
-    scene.loadAudioObject('thedeadfish.wav').then(({uniforms}) => {
-      scene.loadMeshes(uniforms)
+      models: models
     })
 
-    scene.setCameraPosition({x: 0, y: 3, z: 10})
+    let scStream = new SoundCloudAudio('')
+    scStream.resolve('https://www.youtube.com/watch?v=qIPNSRTsW68', function (track){
+      console.log(track)
+    })
+    
+    scene.loadAudioObject({url: 'thedeadfish.wav'}).then(({uniforms}) => {
+      scene.loadMeshes(uniforms)
+    })
     
     const handleResize = () => {
       scene.handleResize(mount.current.clientWidth, mount.current.clientHeight)
     }
       
     const animate = () => {
-      //cube.rotation.x += 0.01
-      //cube.rotation.y += 0.01
-//
-//      torus.rotation.z += 0.01
-//      torus.rotation.y += 0.0001
-
       scene.renderScene()
       frameId = window.requestAnimationFrame(animate)
     }
@@ -112,7 +128,7 @@ const Container = () => {
       //geometry.dispose()
       //material.dispose()
     }
-  }, [])
+  }, [points])
 
   useEffect(() => {
     //console.log(state)
