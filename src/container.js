@@ -43,12 +43,12 @@ const Container = () => {
   console.log('container')
   const {state, actions} = useContext(AudioContext)
   const mount = useRef(null)
-  const [points, setPoints] = useState(null)
+  const [points, setPoints] = useState([{x:0, y: 0, z:0}])
   const [isAnimating, setAnimating] = useState(false)
   const controls = useRef(null)
   
   useEffect(() => {
-    axios.get("http://localhost:8080/points").then(({data}) => setPoints(data.points))
+
   }, [])
   
   useEffect(() => {
