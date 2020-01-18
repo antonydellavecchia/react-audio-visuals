@@ -12,14 +12,15 @@ export default class Model {
     vertexShader = VertexShader,
     fragmentShader,
     vectorFieldConfig,
-    params
+    params,
+    stepsSize = 0.01
   }) {
     this.geometry = geometry
     this.name = name
     this.position = position
     this.vertexShader = vertexShader
     this.fragmentShader = fragmentShader
-    this.vectorField = new VectorField(vectorFieldConfig, params)
+    this.vectorField = new VectorField(vectorFieldConfig, params, stepSize)
   }
 
   initMesh(uniforms) {

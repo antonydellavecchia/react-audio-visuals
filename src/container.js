@@ -134,14 +134,14 @@ const Container = () => {
         vectorFieldConfig: "LORENZ"
       };
     });
-
-    //models.push({
-    //  geometry: new THREE.TorusGeometry(25, 25, 25),
-    //  name: 'floor',
-    //  position: {x: 0, y:0, z: -1},
-    //  vertexShader: AudioVertexShader,
-    //  fragmentShader: GridShader
-    //})
+    
+    models.push({
+      geometry: new THREE.TorusGeometry(25, 25, 25),
+      name: 'floor',
+      position: {x: 0, y:0, z: -1},
+      vertexShader: AudioVertexShader,
+      fragmentShader: GridShader
+    })
 
     let scene = new Scene({
       width,

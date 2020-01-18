@@ -15,7 +15,7 @@ export default class Scene {
     this.renderer.setClearColor('#000000')
     this.renderer.setSize(width, height)
     this.models = models.map(model => new Model(model))
-    this.cameraGroup = new CameraGroup({name: "SQUARE", focus: {x: 0, y: -1, z: 0}}, 25)
+    this.cameraGroup = new CameraGroup({name: "SQUARE", focus: {x: 0, y: -1, z: 0}}, 10)
     this.step = 0
 
     console.log(this.scene)
@@ -44,7 +44,7 @@ export default class Scene {
     this.audio.animate()
 
     if (this.step > 30) {
-      //this.cameraGroup.next()
+      this.cameraGroup.next()
       this.step = 0
     }
 
