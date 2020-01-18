@@ -56,10 +56,10 @@ export default class Scene {
   play() {
     this.audio.play()
     this.cameraGroup.switch(3)
-    //this.cameraGroup.follow(
-    //  this.models[0].mesh.position,
-    //  this.models[0].vectorField
-    //)
+    this.cameraGroup.follow(
+      this.models[0].mesh.position,
+      this.models[0].vectorField
+    )
   }
 
   pause() {

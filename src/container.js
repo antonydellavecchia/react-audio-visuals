@@ -39,20 +39,34 @@ const reducer = (state, action) => {
   }
 }
 
+const generatePoints = () => {
+  return [{
+    x: 0,
+    y: 10,
+    z: 1
+    }]
+}
+
 const Container = () => {
   console.log('container')
   const {state, actions} = useContext(AudioContext)
   const mount = useRef(null)
-  const [points, setPoints] = useState([{x:0, y: 0, z:0}])
+//  const [points, setPoints] = useState([
+//    {x:0, y: 10, z:0}
+//  ])
   const [isAnimating, setAnimating] = useState(false)
   const controls = useRef(null)
   
-  useEffect(() => {
-
-  }, [])
+  //useEffect(() => {
+  //  let point = {x: 1, y: 1, z: 1}
+  //  let newPoints = [points]
+  //  newPoints.push(point)
+//
+//    setPoints(newPoints)
+//  }, [])
   
   useEffect(() => {
-    console.log(points)
+    let points = generatePoints()
     if (!points) return
     
     // initate scene
@@ -61,20 +75,20 @@ const Container = () => {
     let frameId
     let models = points.map((point, index) => {
       return {
-        geometry: new THREE.SphereGeometry(50, 50, 50),
+        geometry: new THREE.SphereGeometry(1, 1, 1),
         name: `disco-ball-${index}`,
         position: point,
         vectorFieldConfig: "LORENZ"
       }
     })
 
-    models.push({
-      geometry: new THREE.TorusGeometry(25, 25, 25),
-      name: 'floor',
-      position: {x: 0, y:0, z: -1},
-      vertexShader: AudioVertexShader,
-      fragmentShader: GridShader
-    })
+    //models.push({
+    //  geometry: new THREE.TorusGeometry(25, 25, 25),
+    //  name: 'floor',
+    //  position: {x: 0, y:0, z: -1},
+    //  vertexShader: AudioVertexShader,
+    //  fragmentShader: GridShader
+    //})
     
     let scene = new Scene({
       width,
@@ -82,12 +96,12 @@ const Container = () => {
       models: models
     })
 
-    let scStream = new SoundCloudAudio('')
-    scStream.resolve('https://www.youtube.com/watch?v=qIPNSRTsW68', function (track){
-      console.log(track)
-    })
+    //let scStream = new SoundCloudAudio('')
+    //scStream.resolve('https://www.youtube.com/watch?v=qIPNSRTsW68', function (track){
+    //  console.log(track)
+    //})
     
-    scene.loadAudioObject({url: 'thedeadfish.wav'}).then(({uniforms}) => {
+    scene.loadAudioObject({url: 'thedeadfish.mp3'}).then(({uniforms}) => {
       scene.loadMeshes(uniforms)
     })
     
@@ -128,7 +142,7 @@ const Container = () => {
       //geometry.dispose()
       //material.dispose()
     }
-  }, [points])
+  }, [])
 
   useEffect(() => {
     //console.log(state)
