@@ -36,9 +36,9 @@ export default function getConfig(name) {
     let rho = 28
 
     return {
-      x: (position) => rho * (position.y - position.x),
-      y: (position) => position.x * (rho - position.z) - position.y,
-      z: (position) => position.x * position.y - beta * position.z
+      x: (position, params) => params[0] ? params[0] * (position.y - position.x) : sigma * (position.y - position.x),
+      y: (position, params) => params[1] ? position.x * (params[0] - position.z) - position.y : position.x * (rho - position.z) - position.y,
+      z: (position, params) => params[2] ? position.x * position.y - params[2] * position.z : position.x * position.y - beta * position.z
     }
 
   default:
