@@ -13,7 +13,7 @@ export default class Model {
     fragmentShader,
     vectorFieldConfig,
     params,
-    stepsSize = 0.01
+    stepSize = 0.01
   }) {
     this.geometry = geometry
     this.name = name
