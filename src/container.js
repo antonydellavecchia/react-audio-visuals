@@ -87,7 +87,7 @@ const Container = () => {
       console.log(track)
     })
     
-    scene.loadAudioObject({url: 'thedeadfish.wav'}).then(({uniforms}) => {
+    scene.loadAudioObject({url: 'thedeadfish.mp3'}).then(({uniforms}) => {
       scene.loadMeshes(uniforms)
     })
     
