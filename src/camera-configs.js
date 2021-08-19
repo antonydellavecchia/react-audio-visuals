@@ -19,6 +19,7 @@ export default function getConfig(name = '') {
       }
     })
 
+    
   default:
     return {
       x: 0,

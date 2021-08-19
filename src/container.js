@@ -83,8 +83,8 @@ const Container = () => {
     })
 
     let scStream = new SoundCloudAudio('')
-    scStream.resolve('https://www.youtube.com/watch?v=qIPNSRTsW68', function (track){
-      console.log(track)
+    scStream.resolve('https://soundcloud.com/thebloodymoustache/sleepy-candies/s-XsBcp', function (track){
+      console.log("this is the youtube track", track)
     })
     
     scene.loadAudioObject({url: 'thedeadfish.wav'}).then(({uniforms}) => {
