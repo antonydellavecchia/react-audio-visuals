@@ -21,10 +21,10 @@ export default function getConfig(name = '') {
 
     
   default:
-    return {
+    return [{
       x: 0,
       y: 0,
       z: 5
-    }
+    }]
   }
 }

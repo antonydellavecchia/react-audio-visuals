@@ -1,6 +1,6 @@
 import * as THREE from  'three'
 import VertexShader from '../shaders/VertexShader.glsl'
-import BassShader from '../shaders/BassShader.glsl'
+import FragmentShader from '../shaders/DefaultFragmentShader.glsl'
 import RedShader from '../shaders/RedShader.glsl'
 
 export const audioMaterial = ({uniforms = null, vertexShader, fragmentShader}) => {
@@ -18,7 +18,7 @@ export const audioMaterial = ({uniforms = null, vertexShader, fragmentShader}) =
 export const audioMesh = ({geometry = new THREE.PlaneGeometry(10,10,10),
                            uniforms = null,
                            vertexShader = VertexShader,
-                           fragmentShader = BassShader
+                           fragmentShader = FragmentShader
                           }) => {
 
   return new THREE.Mesh(

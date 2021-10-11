@@ -1,9 +1,5 @@
 import React, { useRef, useEffect, useState, useContext, useReducer } from 'react'
 import * as THREE from 'three'
-import BassShader from './shaders/BassShader.glsl'
-import GuitarShader from './shaders/GuitarShader.glsl'
-import AudioVertexShader from './shaders/AudioVertexShader.glsl'
-import GridShader from './shaders/GridShader.glsl'
 import { useActions } from './actions'
 import Scene from './objects/Scene'
 import axios from 'axios'
@@ -43,48 +39,26 @@ const Container = () => {
   console.log('container')
   const {state, actions} = useContext(AudioContext)
   const mount = useRef(null)
-  const [points, setPoints] = useState([{x:0, y: 0, z:0}])
   const [isAnimating, setAnimating] = useState(false)
   const controls = useRef(null)
   
-  useEffect(() => {
-
-  }, [])
   
   useEffect(() => {
-    console.log(points)
-    if (!points) return
-    
     // initate scene
     let width = mount.current.clientWidth
     let height = mount.current.clientHeight
     let frameId
-    let models = points.map((point, index) => {
-      return {
-        geometry: new THREE.SphereGeometry(50, 50, 50),
-        name: `disco-ball-${index}`,
-        position: point,
-        vectorFieldConfig: "LORENZ"
-      }
-    })
-
-    models.push({
-      geometry: new THREE.TorusGeometry(25, 25, 25),
-      name: 'floor',
-      position: {x: 0, y:0, z: -1},
-      vertexShader: AudioVertexShader,
-      fragmentShader: GridShader
-    })
+    let models = [{
+      geometry: new THREE.SphereBufferGeometry(10, 10, 10),
+      name: `disco-ball`,
+      position: {x: 0, y: 0, z: 0 }
+    }]
     
     let scene = new Scene({
       width,
       height,
-      models: models
-    })
-
-    let scStream = new SoundCloudAudio('')
-    scStream.resolve('https://soundcloud.com/thebloodymoustache/sleepy-candies/s-XsBcp', function (track){
-      console.log("this is the youtube track", track)
+      models,
+      state
     })
     
     scene.loadAudioObject({url: 'thedeadfish.mp3'}).then(({uniforms}) => {
@@ -115,7 +89,6 @@ const Container = () => {
 
     mount.current.appendChild(scene.renderer.domElement)
     window.addEventListener('resize', handleResize)
-    //start()
 
     controls.current = { start, stop }
       
@@ -128,10 +101,6 @@ const Container = () => {
       //geometry.dispose()
       //material.dispose()
     }
-  }, [points])
-
-  useEffect(() => {
-    //console.log(state)
   }, [])
 
   useEffect(() => {

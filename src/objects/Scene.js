@@ -8,21 +8,26 @@ import VectorField from './VectorField'
 import CameraGroup from './CameraGroup'
               
 export default class Scene {
-  constructor({width, height, models}) {
+  constructor({width, height, models, state}) {
+    this.state = state
     this.scene = new THREE.Scene()
     this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
     this.renderer = new THREE.WebGLRenderer({ antialias: true })
     this.renderer.setClearColor('#000000')
     this.renderer.setSize(width, height)
     this.models = models.map(model => new Model(model))
-    this.cameraGroup = new CameraGroup({name: "SQUARE", focus: {x: 0, y: -1, z: 0}}, 25)
+    this.cameraGroup = new CameraGroup({
+      name: "BASIC",
+      focus: {x: 0, y: 0, z: 0},
+      vectorField: "ZERO"
+    }, 1)
     this.step = 0
 
     console.log(this.scene)
   }
 
   cameraAnimate(stepSize) {
-    const {x, y, z} = this.cameraGroup.activePosition()
+    const {x, y, z} = this.cameraGroup.getActivePosition()
     this.camera.position.z = z
     this.camera.position.x = x
     this.camera.position.y = y
@@ -38,6 +43,7 @@ export default class Scene {
   }
   
   renderScene() {
+    //console.log(this.state)
     this.cameraAnimate()
     this.models.forEach(model => model.animate())
     this.renderer.render(this.scene, this.camera)
@@ -55,7 +61,7 @@ export default class Scene {
 
   play() {
     this.audio.play()
-    this.cameraGroup.switch(3)
+    //this.cameraGroup.switch(3)
     //this.cameraGroup.follow(
     //  this.models[0].mesh.position,
     //  this.models[0].vectorField

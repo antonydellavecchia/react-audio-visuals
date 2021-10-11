@@ -52,7 +52,8 @@ export default class CameraGroup {
     this.vectorField = vectorField
   }
   
-  activePosition() {
+  getActivePosition() {
+    console.log(this.positions, "positions")
     return this.positions[this.number]
   }
 

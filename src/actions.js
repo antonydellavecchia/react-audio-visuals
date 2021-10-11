@@ -1,11 +1,17 @@
-import * as THREE from 'three'
+import {
+  Audio,
+  AudioListener,
+  AudioAnalyser,
+  DataTexture,
+  LuminanceFormat
+} from 'three'
 
 export const useActions = (state, dispatch) => {
   const loadAudio = async (mediaElement, fftSize) => {
     console.log(mediaElement)
-    let listener = new THREE.AudioListener();
-    let audio = new THREE.Audio( listener );
-    let analyser = new THREE.AudioAnalyser( audio, fftSize )
+    let listener = new AudioListener();
+    let audio = new Audio( listener );
+    let analyser = new AudioAnalyser( audio, fftSize )
     await audio.setMediaElementSource(mediaElement);
 
     dispatch({
@@ -22,11 +28,11 @@ export const useActions = (state, dispatch) => {
       type: "SET_UNIFORMS",
       payload: {
         tAudioData: {
-          value: new THREE.DataTexture(
+          value: new DataTexture(
             analyser.data,
             fftSize / 2,
             1,
-            THREE.LuminanceFormat
+            LuminanceFormat
           )
         }
       }

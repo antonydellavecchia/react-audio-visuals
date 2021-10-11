@@ -1,4 +1,3 @@
-import * as THREE from 'three'
 import AudioVertexShader from '../shaders/AudioVertexShader.glsl'
 import VertexShader from '../shaders/VertexShader.glsl'
 import { audioMesh } from '../utils'
