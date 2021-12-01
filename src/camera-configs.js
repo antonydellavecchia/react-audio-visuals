@@ -24,7 +24,7 @@ export default function getConfig(name = '') {
     return [{
       x: 0,
       y: 0,
-      z: 5
+      z: 50
     }]
   }
 }
