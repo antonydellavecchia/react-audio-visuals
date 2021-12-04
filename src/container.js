@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState, useContext, useReducer } from 'react'
 import * as THREE from 'three'
+import BrownianShader from './shaders/BrownianShader.glsl'
 import { useActions } from './actions'
 import Scene from './objects/Scene'
 import axios from 'axios'
@@ -36,7 +37,6 @@ const reducer = (state, action) => {
 }
 
 const Container = () => {
-  console.log('container')
   const {state, actions} = useContext(AudioContext)
   const mount = useRef(null)
   const [isAnimating, setAnimating] = useState(false)
@@ -52,6 +52,11 @@ const Container = () => {
       geometry: new THREE.SphereBufferGeometry(10, 10, 10),
       name: `disco-ball`,
       position: {x: 0, y: 0, z: 0 }
+    }, {
+      geometry: new THREE.PlaneGeometry(1000, width),
+      name: "background",
+      fragmentShader: BrownianShader,
+      position: {x: 0, y:0, z: -1}
     }]
     
     let scene = new Scene({

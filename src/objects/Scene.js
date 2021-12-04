@@ -88,6 +88,7 @@ export default class Scene {
 
   loadMeshes(uniforms) {
     this.models.forEach(model => {
+      console.log(uniforms)
       let mesh = model.initMesh(uniforms)
       this.scene.add(mesh)
     })
