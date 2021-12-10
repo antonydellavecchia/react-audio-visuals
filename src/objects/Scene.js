@@ -88,7 +88,15 @@ export default class Scene {
 
   loadMeshes(uniforms) {
     this.models.forEach(model => {
-      console.log(uniforms)
+      switch (model.geometry.type) {
+      case "PlaneGeometry":
+	uniforms.u_resolution = new THREE.Uniform(new THREE.Vector2(
+	  model.geometry.parameters.width,
+	  model.geometry.parameters.height
+	))
+
+      }
+      console.log(model.geometry.parameters.width)
       let mesh = model.initMesh(uniforms)
       this.scene.add(mesh)
     })

@@ -1,74 +1,92 @@
-varying vec4 vUv;
-uniform float time;
-float PI = 3.14159265358979323846;
+// Author @patriciogv - 2015
+// http://patriciogonzalezvivo.com
 
-float rand(vec2 c){
-  return fract(sin(dot(c.xy ,vec2(12.9898,78.233))) * 43758.5453);
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+uniform float u_time;
+uniform sampler2D tAudioData;
+
+vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x , 289.0); }
+
+float random (in vec2 st) {
+    return fract(sin(dot(st.xy,
+                         vec2(12.9898,78.233)))*
+        43758.5453123 + u_time);
 }
 
-float noise(vec2 p, float freq ){
-  float unit = 100.0 / freq;
-  vec2 ij = floor(p/unit);
-  vec2 xy = mod(p,unit)/unit;
-  //xy = 3.*xy*xy-2.*xy*xy*xy;
-  xy = .5*(1.-cos(PI*xy));
-  float a = rand((ij+vec2(0.,0.)));
-  float b = rand((ij+vec2(1.,0.)));
-  float c = rand((ij+vec2(0.,1.)));
-  float d = rand((ij+vec2(1.,1.)));
-  float x1 = mix(a, b, xy.x);
-  float x2 = mix(c, d, xy.x);
-  return mix(x1, x2, xy.y);
+float snoise(vec2 v){
+  const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+           -0.577350269189626, 0.024390243902439);
+  float f1 = texture2D( tAudioData, vec2(0.0, 1.0) ).r;
+  float f2 = texture2D( tAudioData, vec2(0.0, 4.0) ).r;
+  float f3 = texture2D( tAudioData, vec2(0.0, 7.0) ).r;
+
+  vec2 i  = floor(v + dot(v, C.yy));
+  vec2 x0 = v -   i + dot(i, C.xx);
+  vec2 i1;
+  i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+  vec4 x12 = x0.xyxy + C.xxzz;
+  x12.xy -= i1;
+  i = mod(i, 289.0);
+  vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+  + i.x + vec3(0.0, i1.x, 1.0 ));
+  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy),
+    dot(x12.zw,x12.zw)), 0.0);
+  m = m*m ;
+  m = m*m ;
+  vec3 x = 2.0 * fract(p * C.www) - 1.0;
+
+  vec3 h = abs(x + f1 * cos(0.1 * u_time) * sin(0.1 * u_time)) - 0.5;
+  vec3 ox = floor(x + 0.5 + f2 * cos(0.1 * u_time));
+  vec3 a0 = x - ox;
+  m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+  vec3 g;
+  
+  float f4 = texture2D( tAudioData, vec2(0.0, 30.0) ).r;
+  float f5 = texture2D( tAudioData, vec2(0.0, 60.0) ).r;
+
+  g.x  = f4 * a0.x  * x0.x  + h.x  * x0.y;
+  g.yz = f5 * a0.yz * x12.xz + h.yz * x12.yw;
+  return 130.0 * dot(m, g);
 }
 
-float pNoise(vec2 p, int res){
-  float persistance = .5;
-  float n = 0.;
-  float normK = 0.;
-  float f = 4.;
-  float amp = 1.;
-  int iCount = 0;
-  for (int i = 0; i<50; i++){
-    n+=amp*noise(p, f);
-    f*=2.;
-    normK+=amp;
-    amp*=persistance;
-    if (iCount == res) break;
-    iCount++;
-  }
-  float nf = n/normK;
-  return nf*nf*nf*nf;
+#define OCTAVES 2
+float fbm (in vec2 st) {
+    // Initial values
+    float value = 0.0;
+    float amplitude = .8;
+    float frequency = 0.;
+    float offset = 0.5;
+    //
+    // Loop of octaves
+    for (int i = 0; i < OCTAVES; i++) {
+      float n = abs(snoise(st));     // create creases
+      n = offset - n; // invert so creases are at top
+      n = n * n;      // sharpen creases
+      value += amplitude * n;
+      st *= 2.;
+      amplitude *= .5;
+    }
+    return value;
 }
 
 void main() {
-  float x = vUv.x;
-  float y = vUv.y;
-  float brownianHeight = 0.0;
-  
-  // Properties
-  const int octaves = 1;
-  float lacunarity = 100.0;
-  float gain = 0.5;
-  //
-  // Initial values
-  float amplitude = 5. * abs(y) / 10.0;
-  float frequency = 1.;
-  //brownianHeight = sin(y * frequency);
-  float t = 0.01*(-time * 130.0);
-  
-  //brownianHeight += sin(y*frequency*2.1 + t)*4.5;
-  //brownianHeight += sin(y*frequency*1.72 + t*1.121)*4.0;
-  //brownianHeight += sin(y*frequency*2.221 + t*0.437)*5.0;
-  //brownianHeight += sin(y*frequency*3.1122+ t*4.269)*2.5;
-  //brownianHeight *= amplitude*0.06;
-  //
-  // Loop of octaves
-  for (int i = 0; i < octaves; i++) {
-    brownianHeight += amplitude * noise(vUv.xy + t, frequency);
-    frequency *= lacunarity;
-    amplitude *= gain;
-  }
+    vec2 st = gl_FragCoord.xy/u_resolution.xy;
+    st.x *= u_resolution.x/u_resolution.y;
 
-  float wave = step(brownianHeight, x) * step(x, brownianHeight + 2.0);
-  gl_FragColor = vec4(255.0 * wave, 0.0, 0.0, 1.0);
+    vec3 color = vec3(0.0);\
+
+    float f1 = texture2D( tAudioData, vec2(0.0, 1.0) ).r;
+    float f2 = texture2D( tAudioData, vec2(0.0, 4.0) ).r;
+    float f3 = texture2D( tAudioData, vec2(0.0, 7.0) ).r;
+
+    color += fbm(3.0*st);
+
+    color = vec3(color.r, 1. - color.r, (.5 - color.r) / color.g);
+
+    gl_FragColor = vec4(color,1.0);
 }

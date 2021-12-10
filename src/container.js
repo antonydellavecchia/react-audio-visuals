@@ -53,7 +53,7 @@ const Container = () => {
       name: `disco-ball`,
       position: {x: 0, y: 0, z: 0 }
     }, {
-      geometry: new THREE.PlaneGeometry(1000, width),
+      geometry: new THREE.PlaneGeometry(width, height),
       name: "background",
       fragmentShader: BrownianShader,
       position: {x: 0, y:0, z: -1}

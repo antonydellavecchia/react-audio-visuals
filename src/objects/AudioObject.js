@@ -11,7 +11,7 @@ export default class AudioObject {
     this.audio.setMediaElementSource(this.mediaElement)
     this.analyser = new THREE.AudioAnalyser( this.audio, fftSize );
     this.uniforms = {
-      time: {
+      u_time: {
         value: 0
       },
       tAudioData: {
@@ -37,7 +37,7 @@ export default class AudioObject {
 
   animate = () => {
     this.analyser.getFrequencyData()
-    this.uniforms.time.value += this.stepSize
+    this.uniforms.u_time.value += this.stepSize
     this.uniforms.tAudioData.value.needsUpdate = true
   }
 }

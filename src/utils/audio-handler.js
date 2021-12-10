@@ -4,7 +4,6 @@ import FragmentShader from '../shaders/DefaultFragmentShader.glsl'
 import RedShader from '../shaders/RedShader.glsl'
 
 export const audioMaterial = ({uniforms = null, vertexShader, fragmentShader}) => {
-  console.log('uniforms', uniforms)
   return new THREE.ShaderMaterial( {
     uniforms: uniforms,
     vertexShader: vertexShader,
@@ -15,11 +14,12 @@ export const audioMaterial = ({uniforms = null, vertexShader, fragmentShader}) =
   });
 }
 
-export const audioMesh = ({geometry = new THREE.PlaneGeometry(10,10,10),
-                           uniforms = null,
-                           vertexShader = VertexShader,
-                           fragmentShader = FragmentShader
-                          }) => {
+export const audioMesh = ({
+  geometry = new THREE.PlaneGeometry(10,10,10),
+  uniforms = null,
+  vertexShader = VertexShader,
+  fragmentShader = FragmentShader
+}) => {
 
   return new THREE.Mesh(
     geometry,
