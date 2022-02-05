@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useState, useContext, useReducer } from 'react'
-import * as THREE from 'three'
-import BrownianShader from './shaders/BrownianShader.glsl'
+import {SphereBufferGeometry, PlaneGeometry} from 'three'
 import { useActions } from './actions'
 import Scene from './objects/Scene'
 import axios from 'axios'
@@ -36,28 +35,28 @@ const reducer = (state, action) => {
   }
 }
 
-const Container = () => {
+const Container = ({props}) => {
   const {state, actions} = useContext(AudioContext)
   const mount = useRef(null)
   const [isAnimating, setAnimating] = useState(false)
   const controls = useRef(null)
-  
+  const {backgroundShader} = props
   
   useEffect(() => {
     // initate scene
     let width = mount.current.clientWidth
     let height = mount.current.clientHeight
     let frameId
-    let models = [{
-      geometry: new THREE.SphereBufferGeometry(10, 10, 10),
-      name: `disco-ball`,
-      position: {x: 0, y: 0, z: 0 }
-    }, {
-      geometry: new THREE.PlaneGeometry(width, height),
+    let models = []
+
+    let backgroundModel = {
+      geometry: new PlaneGeometry(width, height),
       name: "background",
-      fragmentShader: BrownianShader,
+      fragmentShader: backgroundShader,
       position: {x: 0, y:0, z: -1}
-    }]
+    }
+
+    models.push(backgroundModel)
     
     let scene = new Scene({
       width,
@@ -73,7 +72,7 @@ const Container = () => {
     const handleResize = () => {
       scene.handleResize(mount.current.clientWidth, mount.current.clientHeight)
     }
-      
+    
     const animate = () => {
       scene.renderScene()
       frameId = window.requestAnimationFrame(animate)
@@ -125,10 +124,10 @@ const Container = () => {
   return <div className="container" ref={mount} onClick={() => setAnimating(!isAnimating)} />
 }
 
-const AudioContainer = () => {
+const AudioContainer = (props) => {
   return (
     <AudioProvider initialState={initialState} reducer={reducer}>
-      <Container/>
+      <Container props={props}/>
     </AudioProvider>
   )
 }

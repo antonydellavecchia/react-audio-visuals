@@ -17,7 +17,7 @@ export default class CameraGroup {
     this.focus = focus
     this.number = 0
     this.vectorField = new VectorField(vectorField)
-    console.log(this.positions)
+
   }
 
   flow(stepSize) {
@@ -53,7 +53,6 @@ export default class CameraGroup {
   }
   
   getActivePosition() {
-    console.log(this.positions, "positions")
     return this.positions[this.number]
   }
 
