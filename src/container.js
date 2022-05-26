@@ -53,7 +53,7 @@ const Container = ({props}) => {
       geometry: new PlaneGeometry(width, height),
       name: "background",
       fragmentShader: backgroundShader,
-      position: {x: 0, y:0, z: -1}
+      position: {x: 0, y:0, z: 1}
     }
 
     models.push(backgroundModel)

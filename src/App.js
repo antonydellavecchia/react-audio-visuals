@@ -3,12 +3,12 @@ import './App.css';
 import Container from './container'
 
 import BrownianShader from './shaders/BrownianShader.glsl'
-import DestroySquare from './shaders/DestroySquare.glsl'
+import RayMarching from './shaders/ray-marching.glsl'
 
 function App() {
   return (
     <div>
-      <Container backgroundShader={DestroySquare}/>
+      <Container backgroundShader={RayMarching}/>
     </div>
   )
 }

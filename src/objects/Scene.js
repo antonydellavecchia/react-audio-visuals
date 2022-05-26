@@ -20,7 +20,7 @@ export default class Scene {
       name: "BASIC",
       focus: {x: 0, y: 0, z: 0},
       vectorField: "ZERO"
-    }, 1)
+    }, 10)
     this.step = 0
 
     console.log(this.scene)
