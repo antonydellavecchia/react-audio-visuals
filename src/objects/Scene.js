@@ -8,8 +8,7 @@ import VectorField from './VectorField'
 import CameraGroup from './CameraGroup'
               
 export default class Scene {
-  constructor({width, height, models, state}) {
-    this.state = state
+  constructor({width, height, models}) {
     this.scene = new THREE.Scene()
     this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
     this.renderer = new THREE.WebGLRenderer({ antialias: true })
@@ -20,9 +19,9 @@ export default class Scene {
       name: "BASIC",
       focus: {x: 0, y: 0, z: 0},
       vectorField: "ZERO"
-    }, 10)
+    }, -1)
     this.step = 0
-
+    this.paused = true
     console.log(this.scene)
   }
 
@@ -41,26 +40,28 @@ export default class Scene {
     this.camera.up.set(0, 0, 1)
     this.cameraGroup.flow(stepSize)
   }
-  
+
   renderScene() {
-    //console.log(this.state)
-    this.cameraAnimate()
-    this.models.forEach(model => model.animate())
-    this.renderer.render(this.scene, this.camera)
-    this.audio.animate()
+    if (!this.paused){
+      this.cameraAnimate()
+      this.models.forEach(model => model.animate())
+      this.renderer.render(this.scene, this.camera)
+      this.audio.animate()
 
-    if (this.step > 30) {
-      //this.cameraGroup.next()
-      this.step = 0
-    }
+      if (this.step > 30) {
+	//this.cameraGroup.next()
+	this.step = 0
+      }
 
-    else {
-      this.step += 1
+      else {
+	this.step += 1
+      }
     }
   }
 
   play() {
     this.audio.play()
+    this.paused = false
     //this.cameraGroup.switch(3)
     //this.cameraGroup.follow(
     //  this.models[0].mesh.position,
@@ -70,6 +71,7 @@ export default class Scene {
 
   pause() {
     this.audio.pause()
+    this.paused = true
   }
 
   add(objects) {

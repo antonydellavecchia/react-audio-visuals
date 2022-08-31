@@ -42,39 +42,22 @@ const Container = ({props}) => {
   const controls = useRef(null)
   const {backgroundShader} = props
   
+  
   useEffect(() => {
-    // initate scene
-    let width = mount.current.clientWidth
-    let height = mount.current.clientHeight
+    console.log("here", isAnimating)
+    let scene = initScene(mount, backgroundShader)
     let frameId
-    let models = []
-
-    let backgroundModel = {
-      geometry: new PlaneGeometry(width, height),
-      name: "background",
-      fragmentShader: backgroundShader,
-      position: {x: 0, y:0, z: 1}
-    }
-
-    models.push(backgroundModel)
-    
-    let scene = new Scene({
-      width,
-      height,
-      models,
-      state
-    })
-    
-    scene.loadAudioObject({url: 'thedeadfish.mp3'}).then(({uniforms}) => {
-      scene.loadMeshes(uniforms)
-    })
     
     const handleResize = () => {
+      setAnimating(false)
+      scene = initScene(mount)
       scene.handleResize(mount.current.clientWidth, mount.current.clientHeight)
+      scene.renderScene(isAnimating)
+      setAnimating(true)
     }
     
     const animate = () => {
-      scene.renderScene()
+      scene.renderScene(isAnimating)
       frameId = window.requestAnimationFrame(animate)
     }
 
@@ -132,4 +115,30 @@ const AudioContainer = (props) => {
   )
 }
 
+const initScene = (mount, backgroundShader) => {
+  // initate scene
+  let width = mount.current.clientWidth
+  let height = mount.current.clientHeight
+  let models = []
+
+  let backgroundModel = {
+    geometry: new PlaneGeometry(width, height),
+    name: "background",
+    fragmentShader: backgroundShader,
+    position: {x: 0, y:0, z: -1}
+  }
+
+  models.push(backgroundModel)
+  
+  let scene = new Scene({
+    width,
+    height,
+    models
+  })
+  
+  scene.loadAudioObject({url: 'thedeadfish.mp3'}).then(({uniforms}) => {
+    scene.loadMeshes(uniforms)
+  })
+  return scene
+}
 export default AudioContainer
