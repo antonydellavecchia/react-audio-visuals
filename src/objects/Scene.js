@@ -17,14 +17,15 @@ export default class Scene {
     this.models = models.map(model => new Model(model))
     this.cameraGroup = new CameraGroup({
       name: "BASIC",
-      focus: {x: 0, y: 0, z: 0},
+      focus: {x: 10, y: 1, z: 10},
       vectorField: "ZERO"
-    }, -1)
+    }, 0)
     this.step = 0
     this.paused = true
     console.log(this.scene)
   }
 
+  
   cameraAnimate(stepSize) {
     const {x, y, z} = this.cameraGroup.getActivePosition()
     this.camera.position.z = z

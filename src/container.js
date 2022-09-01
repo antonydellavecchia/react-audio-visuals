@@ -44,20 +44,15 @@ const Container = ({props}) => {
   
   
   useEffect(() => {
-    console.log("here", isAnimating)
     let scene = initScene(mount, backgroundShader)
     let frameId
     
     const handleResize = () => {
-      setAnimating(false)
-      scene = initScene(mount)
       scene.handleResize(mount.current.clientWidth, mount.current.clientHeight)
-      scene.renderScene(isAnimating)
-      setAnimating(true)
     }
     
     const animate = () => {
-      scene.renderScene(isAnimating)
+      scene.renderScene()
       frameId = window.requestAnimationFrame(animate)
     }
 
@@ -70,7 +65,6 @@ const Container = ({props}) => {
 
     const stop = () => {
       cancelAnimationFrame(frameId)
-      scene.pause()
       frameId = null
     }
 
@@ -122,10 +116,10 @@ const initScene = (mount, backgroundShader) => {
   let models = []
 
   let backgroundModel = {
-    geometry: new PlaneGeometry(width, height),
+    geometry: new SphereBufferGeometry(100, 102, 160),
     name: "background",
     fragmentShader: backgroundShader,
-    position: {x: 0, y:0, z: -1}
+    position: {x: 0, y:0, z: 0}
   }
 
   models.push(backgroundModel)
